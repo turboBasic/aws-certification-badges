@@ -1,0 +1,46 @@
+# --- OS junk ---
+.DS_Store
+.DS_Store?
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.Trashes/
+.Spotlight-V100/
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.iml
+
+# --- Swap / temp files ---
+*~
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*.rej
+.#*
+
+# --- Logs ---
+*.log
+
+# --- Local environment / secrets ---
+.env
+.env.*
+!.env.example
+!.env.template
+
+# --- Archives ---
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# --- GIMP ---
+*.xcf~
+*.xcf.bak
+
+# --- Inkscape ---
+*.svg~
+*.svgz~

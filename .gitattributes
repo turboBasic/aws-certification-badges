@@ -1,0 +1,27 @@
+# Normalize text files across platforms.
+# Default: store text with LF in the repository.
+* text=auto eol=lf
+
+# Windows-native scripts should keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Common binary assets (do not attempt text normalization).
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.tgz binary
+
+# Image editor source files.
+*.xcf binary
+
+# Compressed SVG is binary.
+*.svgz binary

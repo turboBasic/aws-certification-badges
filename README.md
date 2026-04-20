@@ -12,6 +12,7 @@ A collection of badge assets for AWS certifications — vector templates for edi
 | <a href="assets/vector%20rendered/aws-certified-ai-practitioner.svg"><img src="assets/vector%20rendered/aws-certified-ai-practitioner.svg" style="max-height: 100px; height: auto; width: auto;" alt="AWS Certified AI Practitioner"/></a> | AWS Certified AI Practitioner | SVG | [aws-certified-ai-practitioner.svg](assets/vector%20rendered/aws-certified-ai-practitioner.svg) |
 | <a href="assets/vector%20rendered/aws-certified-cloud-practitioner.svg"><img src="assets/vector%20rendered/aws-certified-cloud-practitioner.svg" style="max-height: 100px; height: auto; width: auto;" alt="AWS Certified Cloud Practitioner"/></a> | AWS Certified Cloud Practitioner | SVG | [aws-certified-cloud-practitioner.svg](assets/vector%20rendered/aws-certified-cloud-practitioner.svg) |
 | <a href="assets/vector%20rendered/aws-certified-solutions-architect-associate.svg"><img src="assets/vector%20rendered/aws-certified-solutions-architect-associate.svg" style="max-height: 100px; height: auto; width: auto;" alt="AWS Certified Solutions Architect Associate"/></a> | AWS Certified Solutions Architect Associate | SVG | [aws-certified-solutions-architect-associate.svg](assets/vector%20rendered/aws-certified-solutions-architect-associate.svg) |
+| <a href="assets/vector%20rendered/aws-certified-solutions-architect-professional.svg"><img src="assets/vector%20rendered/aws-certified-solutions-architect-professional.svg" style="max-height: 100px; height: auto; width: auto;" alt="AWS Certified Solutions Architect Professional"/></a> | AWS Certified Solutions Architect Professional | SVG | [aws-certified-solutions-architect-professional.svg](assets/vector%20rendered/aws-certified-solutions-architect-professional.svg) |
 
 ## Structure
 
@@ -22,9 +23,11 @@ assets/
 ├── vector rendered/
 │   ├── aws-certified-ai-practitioner.svg
 │   ├── aws-certified-cloud-practitioner.svg
-│   └── aws-certified-solutions-architect-associate.svg
+│   ├── aws-certified-solutions-architect-associate.svg
+│   └── aws-certified-solutions-architect-professional.svg
 └── raster examples/
     ├── aws-certified-ai-practitioner-logo-600px.png
     ├── aws-certified-cloud-practitioner-logo-600px.png
-    └── aws-certified-solutions-architect-associate-logo-600px.png
+    ├── aws-certified-solutions-architect-associate-logo-600px.png
+    └── aws-certified-solutions-architect-professional-logo-600px.png
 ```

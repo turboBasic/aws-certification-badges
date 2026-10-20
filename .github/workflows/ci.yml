@@ -1,0 +1,15 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: just setup
+      - run: just lint
+      - run: just typecheck
+      - run: just test
+      - run: just build

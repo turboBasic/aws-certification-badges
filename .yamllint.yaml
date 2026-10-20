@@ -1,0 +1,13 @@
+extends: default
+
+# GitHub CI is maintained separately from the local tooling alignment.
+ignore: |
+  .github/workflows/
+
+rules:
+  # These files are single documents, so a leading --- adds no information.
+  document-start: disable
+  # Preserve prose and command lines rather than wrapping them to fit a column.
+  line-length: disable
+  comments:
+    min-spaces-from-content: 1

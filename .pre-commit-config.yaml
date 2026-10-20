@@ -1,0 +1,64 @@
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^assets/
+      - id: end-of-file-fixer
+        exclude: ^assets/
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        # Badge references and editable SVGs are source assets, not build outputs.
+        args: [--maxkb=5120]
+      - id: check-merge-conflict
+
+  - repo: local
+    hooks:
+      - id: commitizen
+        name: commitizen check
+        entry: uv run --locked cz check --allow-abort --commit-msg-file
+        language: system
+        stages: [commit-msg]
+      - id: ruff
+        name: Ruff
+        entry: uv run --locked ruff check --force-exclude --fix
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+      - id: ruff-format
+        name: Ruff format
+        entry: uv run --locked ruff format --force-exclude
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+      - id: pyright
+        name: Pyright
+        entry: uv run --locked pyright
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: yamllint
+        name: yamllint
+        entry: uv run --locked yamllint --strict
+        language: system
+        types: [yaml]
+      - id: taplo-fmt
+        name: taplo fmt
+        entry: taplo fmt
+        language: system
+        types: [toml]
+        pass_filenames: false
+      - id: markdownlint-cli2
+        name: markdownlint-cli2
+        entry: markdownlint-cli2
+        language: system
+        types: [markdown]
+      - id: cspell
+        name: Spelling
+        entry: cspell lint --no-progress --no-must-find-files
+        language: system
+        types: [text]
+        stages: [pre-commit]

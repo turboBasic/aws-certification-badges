@@ -25,3 +25,14 @@
 
 # Compressed SVG is binary.
 *.svgz binary
+
+*.py text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+*.txt text eol=lf
+*.md text eol=lf
+*.lock text eol=lf
+justfile text eol=lf

@@ -1,0 +1,86 @@
+import json
+from pathlib import Path
+
+import pytest
+from PIL import Image
+from typer.testing import CliRunner
+
+from badge_prep.cli import app
+from badge_prep.images import font_sample, normalize, palette
+
+runner = CliRunner()
+
+
+def test_normalize_crops_alpha_and_preserves_proportions() -> None:
+    image = Image.new("RGBA", (100, 100))
+    image.paste((255, 0, 0, 255), (20, 30, 80, 60))
+    result = normalize(image, 80, 10)
+    assert result.size == (80, 80)
+    assert result.getchannel("A").getbbox() == (10, 25, 70, 55)
+
+
+def test_palette_excludes_hidden_colors_and_orders_by_frequency() -> None:
+    image = Image.new("RGBA", (20, 1), (0, 255, 0, 0))
+    image.paste((255, 0, 0, 255), (0, 0, 6, 1))
+    image.paste((0, 0, 255, 255), (6, 0, 8, 1))
+    assert palette(image, 2) == ["#ff0000", "#0000ff"]
+
+
+def test_empty_image_rejected() -> None:
+    with pytest.raises(ValueError, match="transparent"):
+        normalize(Image.new("RGBA", (5, 5)), 50, 5)
+
+
+def test_batch_outputs_and_overwrite_protection(tmp_path: Path) -> None:
+    source = tmp_path / "input"
+    source.mkdir()
+    Image.new("RGB", (30, 20), "red").save(source / "badge.png")
+    output = tmp_path / "output"
+    arguments = ["prepare", str(source), "--output", str(output), "--size", "100"]
+    assert runner.invoke(app, arguments).exit_code == 0
+    prepared = output / "badge.png"
+    original = prepared.read_bytes()
+    assert json.loads((output / "badge.palette.json").read_text())["colors"] == ["#ff0000"]
+    assert runner.invoke(app, arguments).exit_code == 1
+    assert prepared.read_bytes() == original
+
+
+def test_batch_collision_rejected_before_writing(tmp_path: Path) -> None:
+    Image.new("RGB", (10, 10)).save(tmp_path / "badge.png")
+    Image.new("RGB", (10, 10)).save(tmp_path / "badge.jpg")
+    output = tmp_path / "output"
+    result = runner.invoke(app, ["prepare", str(tmp_path), "--output", str(output)])
+    assert result.exit_code == 1
+    assert "duplicate" in result.output
+    assert not output.exists()
+
+
+def test_source_cannot_be_output(tmp_path: Path) -> None:
+    source = tmp_path / "badge.png"
+    Image.new("RGB", (10, 10)).save(source)
+    original = source.read_bytes()
+    result = runner.invoke(app, ["prepare", str(source), "--output", str(tmp_path)])
+    assert result.exit_code == 1
+    assert source.read_bytes() == original
+
+
+def test_font_sample_flattens_and_resizes(tmp_path: Path) -> None:
+    source, output = tmp_path / "badge.png", tmp_path / "sample.png"
+    Image.new("RGBA", (20, 10)).save(source)
+    font_sample(source, output, (2, 1, 12, 6), 3, "white")
+    with Image.open(output) as sample:
+        assert sample.size == (30, 15)
+        assert sample.mode == "RGB"
+        assert sample.getpixel((0, 0)) == (255, 255, 255)
+    with pytest.raises(FileExistsError):
+        font_sample(source, output, (2, 1, 12, 6), 3, "white")
+
+
+@pytest.mark.parametrize("box", ["1,2,3", "bad", "0,0,100,100", "5,0,1,2"])
+def test_font_sample_invalid_box(tmp_path: Path, box: str) -> None:
+    source = tmp_path / "badge.png"
+    Image.new("RGB", (20, 10)).save(source)
+    output = tmp_path / "sample.png"
+    result = runner.invoke(app, ["font-sample", str(source), "--box", box, "--output", str(output)])
+    assert result.exit_code == 1
+    assert not output.exists()

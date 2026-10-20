@@ -1,0 +1,41 @@
+version: "0.2"
+language: en,en-GB
+caseSensitive: false
+enableGlobDot: true
+useGitignore: true
+
+dictionaryDefinitions:
+  - name: project
+    path: .cspell/project.txt
+    description: names, tooling and identifiers specific to this repository
+    addWords: true
+
+dictionaries:
+  - project
+  - bash
+  - companies
+  - computing-acronyms
+  - en-common-misspellings
+  - filetypes
+  - git
+  - python
+  - shellscript
+  - softwareTerms
+  - software-tools
+
+ignorePaths:
+  - .git/**
+  - .cspell/**
+  - assets/**
+  - .github/workflows/**
+  - tmp/**
+  - uv.lock
+
+ignoreRegExpList:
+  - /\b[0-9a-f]{7,40}\b/
+  - /(?<=https?:\/\/)\S+/
+
+overrides:
+  - filename: "**/*.py"
+    dictionaries:
+      - python

@@ -1,0 +1,6 @@
+# Taplo does not respect .gitignore.
+exclude = ["**/.venv/**"]
+
+[formatting]
+indent_string = "  "
+array_auto_collapse = false

@@ -43,15 +43,24 @@ def discover_sources(source: Path, output: Path) -> list[Path]:
 
 @app.command("prepare")
 def prepare_command(
-    source: Annotated[Path, typer.Argument(exists=True, readable=True)],
-    output: Annotated[Path, typer.Option(help="Separate directory for generated files.")] = Path(
-        "output"
-    ),
-    size: Annotated[int, typer.Option(min=1, max=8192)] = 1024,
-    padding: Annotated[int, typer.Option(min=0)] = 32,
-    colors: Annotated[int, typer.Option(min=1, max=256)] = 8,
+    source: Annotated[
+        Path, typer.Argument(help="One supported raster image or a flat directory of images.")
+    ],
+    output: Annotated[
+        Path,
+        typer.Option(help="Destination directory; existing targets are never overwritten."),
+    ] = Path("output"),
+    size: Annotated[
+        int, typer.Option(min=1, max=8192, help="Transparent square size in pixels.")
+    ] = 1024,
+    padding: Annotated[
+        int, typer.Option(min=0, help="Minimum transparent padding around the artwork, in pixels.")
+    ] = 32,
+    colors: Annotated[
+        int, typer.Option(min=1, max=256, help="Maximum number of colors in the palette JSON.")
+    ] = 8,
 ) -> None:
-    """Crop alpha margins, normalize size, and export PNG + palette JSON."""
+    """Write a transparent square PNG and source-color palette JSON per input image."""
     try:
         sources = discover_sources(source, output)
         if padding * 2 >= size:
@@ -86,12 +95,19 @@ def prepare_command(
 
 @app.command("font-sample")
 def font_sample_command(
-    source: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
-    box: Annotated[str, typer.Option(help="Original pixels: left,top,right,bottom (exclusive).")],
-    output: Annotated[Path, typer.Option()] = Path("output/font-sample.png"),
-    scale: Annotated[int, typer.Option(min=1, max=8)] = 3,
+    source: Annotated[Path, typer.Argument(help="Raster image containing the text to sample.")],
+    box: Annotated[
+        str,
+        typer.Option(
+            help="Crop bounds in oriented-image pixels: left,top,right,bottom; right/bottom excluded."
+        ),
+    ],
+    output: Annotated[
+        Path, typer.Option(help="Output PNG path; existing files are never overwritten.")
+    ] = Path("output/font-sample.png"),
+    scale: Annotated[int, typer.Option(min=1, max=8, help="Integer enlargement from 1 to 8.")] = 3,
     background: Annotated[
-        str, typer.Option(help="Solid color behind transparent pixels.")
+        str, typer.Option(help="Pillow color used behind transparent crop pixels.")
     ] = "white",
 ) -> None:
     """Export a text region for manual font matching; does not identify fonts."""

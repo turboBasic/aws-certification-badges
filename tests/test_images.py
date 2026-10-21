@@ -187,6 +187,60 @@ def test_prepare_rejects_unsupported_and_empty_inputs(tmp_path: Path) -> None:
     assert not output.exists()
 
 
+def test_prepare_reports_corrupt_image_without_traceback(tmp_path: Path) -> None:
+    source = tmp_path / "corrupt.png"
+    source.write_bytes(b"not an image")
+
+    result = runner.invoke(app, ["prepare", str(source), "--output", str(tmp_path / "output")])
+
+    assert result.exit_code == 1
+    assert source.name in result.output
+    assert "Traceback" not in result.output
+
+
+def test_prepare_invalid_option_is_concise() -> None:
+    result = runner.invoke(app, ["prepare", "missing.png", "--size", "0"])
+
+    assert result.exit_code == 2
+    assert "Traceback" not in result.output
+
+
+def test_prepare_reports_write_failure_without_traceback(tmp_path: Path) -> None:
+    source = tmp_path / "badge.png"
+    Image.new("RGB", (10, 10), "red").save(source)
+    output_parent = tmp_path / "not-a-directory"
+    output_parent.write_text("keep this file")
+
+    result = runner.invoke(app, ["prepare", str(source), "--output", str(output_parent / "output")])
+
+    assert result.exit_code == 1
+    assert "Error preparing" in result.output
+    assert "Traceback" not in result.output
+
+
+def test_font_sample_reports_write_failure_without_traceback(tmp_path: Path) -> None:
+    source = tmp_path / "badge.png"
+    Image.new("RGB", (10, 10), "red").save(source)
+    output_parent = tmp_path / "not-a-directory"
+    output_parent.write_text("keep this file")
+
+    result = runner.invoke(
+        app,
+        [
+            "font-sample",
+            str(source),
+            "--box",
+            "0,0,5,5",
+            "--output",
+            str(output_parent / "sample.png"),
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert "Error:" in result.output
+    assert "Traceback" not in result.output
+
+
 def test_prepare_rejects_symlink_input(tmp_path: Path) -> None:
     source = tmp_path / "source.png"
     Image.new("RGB", (2, 2), "red").save(source)

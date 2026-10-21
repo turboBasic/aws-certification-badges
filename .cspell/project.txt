@@ -3,6 +3,9 @@ Anthropic
 antialiasing
 autocontrast
 bbox
+ccao
+ccar
+ccdv
 charliermarsh
 cspell
 davidanson

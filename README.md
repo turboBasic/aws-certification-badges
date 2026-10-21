@@ -106,6 +106,9 @@ owns that check; commits still run its hook. `just fmt` formats Python and TOML.
 GitHub workflow validation is outside these local checks. Source assets remain
 untouched; the large-file guard allows files up to 5 MiB.
 
+The supplied Anthropic raster acceptance results, source hashes, and manual inspection notes are
+recorded in [the badge preparation acceptance record](docs/badge-prep-acceptance.md).
+
 Spelling rules and exclusions live in `.cspell.config.yaml`; project words live in
 `.cspell/project.txt`. Shared VS Code settings select the project interpreter,
 pytest, Ruff, and that dictionary; extension recommendations are included.

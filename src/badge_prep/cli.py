@@ -44,7 +44,10 @@ def discover_sources(source: Path, output: Path) -> list[Path]:
 @app.command("prepare")
 def prepare_command(
     source: Annotated[
-        Path, typer.Argument(help="One supported raster image or a flat directory of images.")
+        Path,
+        typer.Argument(
+            help="One PNG, JPEG, WebP, TIFF, or BMP image, or a flat directory of images."
+        ),
     ],
     output: Annotated[
         Path,
@@ -95,7 +98,10 @@ def prepare_command(
 
 @app.command("font-sample")
 def font_sample_command(
-    source: Annotated[Path, typer.Argument(help="Raster image containing the text to sample.")],
+    source: Annotated[
+        Path,
+        typer.Argument(help="PNG, JPEG, WebP, TIFF, or BMP image containing the text to sample."),
+    ],
     box: Annotated[
         str,
         typer.Option(

@@ -205,6 +205,16 @@ def test_prepare_invalid_option_is_concise() -> None:
     assert "Traceback" not in result.output
 
 
+@pytest.mark.parametrize("command", ["prepare", "font-sample"])
+def test_command_help_names_supported_raster_formats(command: str) -> None:
+    result = runner.invoke(app, [command, "--help"])
+
+    assert result.exit_code == 0
+    assert all(
+        image_format in result.output for image_format in ("PNG", "JPEG", "WebP", "TIFF", "BMP")
+    )
+
+
 def test_prepare_reports_write_failure_without_traceback(tmp_path: Path) -> None:
     source = tmp_path / "badge.png"
     Image.new("RGB", (10, 10), "red").save(source)

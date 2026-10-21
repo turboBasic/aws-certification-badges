@@ -1,6 +1,8 @@
 """Small image operations independent of the CLI."""
 
 import json
+import os
+import tempfile
 import warnings
 from collections import Counter
 from pathlib import Path
@@ -73,15 +75,48 @@ def prepare(source: Path, output: Path, size: int, padding: int, colors: int) ->
     image = load_rgba(source)
     normalized = normalize(image, size, padding)
     swatches = palette(image, colors)
-    # Both outputs are checked before either file is created.
     targets = [output / f"{source.stem}.png", output / f"{source.stem}.palette.json"]
     ensure_available(targets)
     output.mkdir(parents=True, exist_ok=True)
-    with targets[0].open("xb") as handle:
-        normalized.save(handle, format="PNG")
-    with targets[1].open("x") as handle:
-        json.dump({"source": source.name, "colors": swatches}, handle, indent=2)
-        handle.write("\n")
+
+    staged: list[Path] = []
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb", dir=output, prefix=f".{source.stem}.", suffix=".png.tmp", delete=False
+        ) as handle:
+            staged.append(Path(handle.name))
+            normalized.save(handle, format="PNG")
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=output,
+            prefix=f".{source.stem}.",
+            suffix=".palette.json.tmp",
+            delete=False,
+        ) as handle:
+            staged.append(Path(handle.name))
+            json.dump({"source": source.name, "colors": swatches}, handle, indent=2)
+            handle.write("\n")
+        _publish_pair(staged, targets)
+    finally:
+        for temporary in staged:
+            temporary.unlink(missing_ok=True)
+
+
+def _publish_pair(staged: list[Path], targets: list[Path]) -> None:
+    published: list[tuple[Path, Path]] = []
+    try:
+        for temporary, target in zip(staged, targets, strict=True):
+            os.link(temporary, target)
+            published.append((temporary, target))
+    except BaseException:
+        for temporary, target in reversed(published):
+            try:
+                if os.path.samefile(temporary, target):
+                    target.unlink()
+            except OSError:
+                pass
+        raise
 
 
 def ensure_available(paths: list[Path]) -> None:

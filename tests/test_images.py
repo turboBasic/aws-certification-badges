@@ -302,3 +302,59 @@ def test_single_file_preflight_rejects_output_symlink_to_source(tmp_path: Path) 
     assert source.read_bytes() == original
     assert (output / "badge.png").is_symlink()
     assert not (output / "badge.palette.json").exists()
+
+
+def test_prepare_cleans_staged_files_after_staging_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from badge_prep import images
+
+    source = tmp_path / "badge.png"
+    Image.new("RGB", (10, 10), "red").save(source)
+    output = tmp_path / "output"
+    output.mkdir()
+    sentinel = output / "keep.txt"
+    sentinel.write_text("preserve this file")
+
+    def fail_dump(*args: object, **kwargs: object) -> None:
+        raise OSError("injected palette staging failure")
+
+    monkeypatch.setattr(images.json, "dump", fail_dump)
+
+    with pytest.raises(OSError, match="injected palette staging failure"):
+        images.prepare(source, output, 16, 0, 2)
+
+    assert list(output.iterdir()) == [sentinel]
+    assert sentinel.read_text() == "preserve this file"
+
+
+def test_prepare_rolls_back_published_png_after_palette_publish_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from badge_prep import images
+
+    source = tmp_path / "badge.png"
+    Image.new("RGB", (10, 10), "red").save(source)
+    original = source.read_bytes()
+    output = tmp_path / "output"
+    output.mkdir()
+    sentinel = output / "keep.txt"
+    sentinel.write_text("preserve this file")
+    real_link = images.os.link
+    calls = 0
+
+    def fail_second_link(source_path: str | Path, target_path: str | Path) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("injected palette publish failure")
+        real_link(source_path, target_path)
+
+    monkeypatch.setattr(images.os, "link", fail_second_link)
+
+    with pytest.raises(OSError, match="injected palette publish failure"):
+        images.prepare(source, output, 16, 0, 2)
+
+    assert source.read_bytes() == original
+    assert list(output.iterdir()) == [sentinel]
+    assert sentinel.read_text() == "preserve this file"

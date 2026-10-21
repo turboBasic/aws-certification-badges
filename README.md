@@ -40,8 +40,11 @@ source image; it does not include transparent pixels or change the prepared PNG.
 
 Supported formats: PNG, JPEG, WebP, TIFF, and BMP; only the first frame is used.
 Directory traversal is nonrecursive. Existing outputs and duplicate stems are rejected
-before batch writing. A corrupt image stops processing; earlier successful outputs
-remain. Choose a new output directory for another run.
+before batch writing. Each PNG and palette pair is staged in the destination directory and
+published with hard links; reported publish errors trigger rollback attempts. The destination
+filesystem must support hard links. Two output files cannot be made visible as one transaction,
+so abrupt process termination between publishes can leave one file. A corrupt image stops
+processing; earlier successful outputs remain. Choose a new output directory for another run.
 
 ## Font matching helper
 

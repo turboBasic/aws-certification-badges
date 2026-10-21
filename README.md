@@ -27,6 +27,11 @@ Prepare a single image or every supported image directly inside a directory:
 uv run badge-prep prepare "assets/raster examples" --output output/aws --size 1024 --padding 32 --colors 8
 ```
 
+`source` accepts one supported image or a flat directory. Supported formats are PNG,
+JPEG, WebP, TIFF, and BMP. Defaults are `--output output`, `--size 1024`,
+`--padding 32`, and `--colors 8`; size is limited to 1–8192 pixels, padding must
+leave room on the canvas, and colors is limited to 1–256.
+
 Each input produces `<stem>.png` and `<stem>.palette.json`. Preparation crops only
 transparent margins, preserves aspect ratio, and centers the result on a transparent
 square. Opaque backgrounds stay intact. Palette JSON lists approximate RGB colors
@@ -38,13 +43,15 @@ The palette JSON schema has a `source` filename string and a `colors` array of
 six-digit hexadecimal RGB strings. It describes approximated colors found in the
 source image; it does not include transparent pixels or change the prepared PNG.
 
-Supported formats: PNG, JPEG, WebP, TIFF, and BMP; only the first frame is used.
-Directory traversal is nonrecursive. Existing outputs and duplicate stems are rejected
-before batch writing. Each PNG and palette pair is staged in the destination directory and
-published with hard links; reported publish errors trigger rollback attempts. The destination
-filesystem must support hard links. Two output files cannot be made visible as one transaction,
-so abrupt process termination between publishes can leave one file. A corrupt image stops
-processing; earlier successful outputs remain. Choose a new output directory for another run.
+Only the first frame is used, after EXIF orientation is applied. Directory traversal is
+nonrecursive. Existing outputs, duplicate stems, symlink inputs, and output directories
+nested inside the batch input are rejected before writing. Each PNG and palette pair is
+staged in the destination directory and published with hard links; reported publish errors
+trigger rollback attempts. The destination filesystem must support hard links. Two output
+files cannot be made visible as one transaction, so abrupt process termination between
+publishes can leave one file. Batch members are processed independently: failures are reported
+with their source paths, successful pairs are kept, and the command exits 1 if any member fails.
+Invalid command arguments exit 2. Choose a new output directory for another run.
 
 ## Font matching helper
 
@@ -57,8 +64,12 @@ uv run badge-prep font-sample "assets/raster examples/aws-certified-cloud-practi
 Those coordinates illustrate the syntax; choose the bounds around your target text.
 Coordinates are `left,top,right,bottom` in pixels after EXIF orientation, with right
 and bottom excluded. Export one text style at a time and retain distinctive letters.
-Choose a background that contrasts with the text; the option fills transparent pixels
-and does not remove an existing background. Enlargement adds no missing image detail.
+The source must be one supported raster image. Defaults are output
+`output/font-sample.png`, `--scale 3`, and `--background white`; scale is limited to
+1–8. The output path must not already exist. Choose a background that contrasts with
+the text; the option fills transparent pixels and does not remove an existing background.
+Enlargement adds no missing image detail. Invalid crop bounds, input data, or write failures
+exit 1; invalid command arguments exit 2.
 
 The helper saves an RGB PNG and prints links to
 [WhatTheFont](https://www.myfonts.com/pages/whatthefont) and

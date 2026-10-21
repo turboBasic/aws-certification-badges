@@ -100,6 +100,57 @@ def test_batch_outputs_and_overwrite_protection(tmp_path: Path) -> None:
     assert prepared.read_bytes() == original
 
 
+@pytest.mark.parametrize(
+    ("extension", "image_format"),
+    [
+        ("png", "PNG"),
+        ("jpg", "JPEG"),
+        ("webp", "WEBP"),
+        ("tiff", "TIFF"),
+        ("bmp", "BMP"),
+    ],
+)
+def test_prepare_supported_formats_preserves_expected_output_contract(
+    tmp_path: Path, extension: str, image_format: str
+) -> None:
+    source = tmp_path / f"badge.{extension}"
+    Image.new("RGB", (4, 2), (240, 32, 16)).save(source, format=image_format)
+    output = tmp_path / "output"
+
+    result = runner.invoke(
+        app,
+        [
+            "prepare",
+            str(source),
+            "--output",
+            str(output),
+            "--size",
+            "8",
+            "--padding",
+            "0",
+            "--colors",
+            "1",
+        ],
+    )
+
+    assert result.exit_code == 0
+    with Image.open(output / "badge.png") as prepared:
+        assert prepared.mode == "RGBA"
+        assert prepared.size == (8, 8)
+        assert prepared.getchannel("A").getbbox() == (0, 2, 8, 6)
+        pixel = prepared.getpixel((4, 3))
+        assert isinstance(pixel, tuple)
+        assert pixel[0] > 200 and pixel[1] < 60 and pixel[2] < 40 and pixel[3] == 255
+
+    palette_data = json.loads((output / "badge.palette.json").read_text())
+    assert set(palette_data) == {"source", "colors"}
+    assert palette_data["source"] == source.name
+    assert len(palette_data["colors"]) == 1
+    assert isinstance(palette_data["colors"][0], str)
+    assert len(palette_data["colors"][0]) == 7
+    assert palette_data["colors"][0].startswith("#")
+
+
 def test_batch_collision_rejected_before_writing(tmp_path: Path) -> None:
     source = tmp_path / "input"
     source.mkdir()

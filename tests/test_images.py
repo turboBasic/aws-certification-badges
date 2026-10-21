@@ -64,6 +64,22 @@ def test_palette_excludes_hidden_colors_and_orders_by_frequency() -> None:
     assert palette(image, 2) == ["#ff0000", "#0000ff"]
 
 
+def test_palette_counts_partially_transparent_pixels_once() -> None:
+    image = Image.new("RGBA", (4, 1), (0, 255, 0, 0))
+    image.paste((255, 0, 0, 1), (0, 0, 3, 1))
+    image.paste((0, 0, 255, 255), (3, 0, 4, 1))
+
+    assert palette(image, 2) == ["#ff0000", "#0000ff"]
+
+
+def test_palette_ties_use_color_order_deterministically() -> None:
+    image = Image.new("RGB", (2, 1), "red")
+    image.paste("blue", (1, 0, 2, 1))
+
+    assert palette(image, 2) == ["#0000ff", "#ff0000"]
+    assert palette(image, 2) == ["#0000ff", "#ff0000"]
+
+
 def test_empty_image_rejected() -> None:
     with pytest.raises(ValueError, match="transparent"):
         normalize(Image.new("RGBA", (5, 5)), 50, 5)
@@ -78,7 +94,8 @@ def test_batch_outputs_and_overwrite_protection(tmp_path: Path) -> None:
     assert runner.invoke(app, arguments).exit_code == 0
     prepared = output / "badge.png"
     original = prepared.read_bytes()
-    assert json.loads((output / "badge.palette.json").read_text())["colors"] == ["#ff0000"]
+    palette_data = json.loads((output / "badge.palette.json").read_text())
+    assert palette_data == {"source": "badge.png", "colors": ["#ff0000"]}
     assert runner.invoke(app, arguments).exit_code == 1
     assert prepared.read_bytes() == original
 

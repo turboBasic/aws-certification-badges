@@ -34,6 +34,10 @@ from the original visible pixels, most frequent first; partially transparent pix
 count once using their underlying RGB values. Gradients and antialiasing affect matches.
 The PNG retains the original colors rather than applying the palette.
 
+The palette JSON schema has a `source` filename string and a `colors` array of
+six-digit hexadecimal RGB strings. It describes approximated colors found in the
+source image; it does not include transparent pixels or change the prepared PNG.
+
 Supported formats: PNG, JPEG, WebP, TIFF, and BMP; only the first frame is used.
 Directory traversal is nonrecursive. Existing outputs and duplicate stems are rejected
 before batch writing. A corrupt image stops processing; earlier successful outputs

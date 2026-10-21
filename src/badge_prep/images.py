@@ -33,24 +33,33 @@ def palette(image: Image.Image, colors: int) -> list[str]:
     if not 1 <= colors <= 256:
         raise ValueError("Colors must be between 1 and 256.")
     rgba = image.convert("RGBA")
-    # Pack visible pixels only, so hidden RGB values never become palette entries.
-    data = rgba.tobytes()
+    # Quantize only visible pixels without copying the full image into RGB bytes.
     pixels = bytearray()
-    for red, green, blue, alpha in zip(data[::4], data[1::4], data[2::4], data[3::4], strict=True):
-        if alpha > 0:
-            pixels.extend((red, green, blue))
+    for y in range(rgba.height):
+        for x in range(rgba.width):
+            pixel = rgba.getpixel((x, y))
+            if isinstance(pixel, tuple) and pixel[3]:
+                pixels.extend(pixel[:3])
     if not pixels:
         raise ValueError("Image is fully transparent.")
-    strip = Image.frombytes("RGB", (len(pixels) // 3, 1), bytes(pixels))
+    strip = Image.frombytes("RGB", (len(pixels) // 3, 1), pixels)
     quantized = strip.quantize(colors=colors, dither=Image.Dither.NONE)
-    entries = Counter(quantized.tobytes())
+    entries: Counter[int] = Counter()
+    for x in range(quantized.width):
+        index = quantized.getpixel((x, 0))
+        if isinstance(index, int):
+            entries[index] += 1
     table = quantized.getpalette()
     if table is None:
         raise ValueError("Could not extract palette.")
-    return [
-        "#{:02x}{:02x}{:02x}".format(*table[index * 3 : index * 3 + 3])
-        for index, _ in sorted(entries.items(), key=lambda entry: (-entry[1], entry[0]))
+    colors_by_frequency = [
+        (
+            "#{:02x}{:02x}{:02x}".format(*table[index * 3 : index * 3 + 3]),
+            count,
+        )
+        for index, count in entries.items()
     ]
+    return [color for color, _ in sorted(colors_by_frequency, key=lambda item: (-item[1], item[0]))]
 
 
 def prepare(source: Path, output: Path, size: int, padding: int, colors: int) -> None:

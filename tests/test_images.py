@@ -485,7 +485,7 @@ def test_batch_reports_corrupt_member_and_keeps_valid_pair(tmp_path: Path) -> No
     result = runner.invoke(app, ["prepare", str(source), "--output", str(output)])
 
     assert result.exit_code == 1
-    assert "a-corrupt.png" in result.output
+    assert "a-corrupt.png" in " ".join(result.output.split())
     assert "Batch complete: 1 succeeded, 1 failed." in result.output
     assert (output / "b-valid.png").is_file()
     assert (output / "b-valid.palette.json").is_file()

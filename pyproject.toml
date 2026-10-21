@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "badge-prep"
+version = "0.1.0"
+description = "Prepare badge rasters for manual vectorization and font matching"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = ["pillow>=12,<14", "typer>=0.16,<1", "rich>=14,<15"]
+
+[project.scripts]
+badge-prep = "badge_prep.cli:app"
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "pyright>=1.1.400",
+  "ruff>=0.11",
+  "commitizen>=4.17",
+  "yamllint>=1.35",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/badge_prep"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+include = ["src", "tests"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.14"
+
+[tool.ruff]
+target-version = "py314"
+src = ["src", "tests"]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
+ignore = ["E501"]                                            # Line length is the formatter's job.
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "semver"
+version_provider = "pep621"

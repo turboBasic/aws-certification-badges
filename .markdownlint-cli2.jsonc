@@ -1,0 +1,12 @@
+{
+  "gitignore": true,
+  "ignores": ["tmp/**"],
+  "config": {
+    "default": true,
+    // Preserve prose wrapping while keeping headings readable, as in github-actions.
+    "MD013": {
+      "line_length": 100000,
+      "heading_line_length": 80
+    }
+  }
+}

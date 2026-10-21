@@ -8,7 +8,9 @@ $RECYCLE.BIN/
 .Spotlight-V100/
 
 # --- Editor / IDE ---
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 *.iml
 
@@ -44,3 +46,21 @@ $RECYCLE.BIN/
 # --- Inkscape ---
 *.svg~
 *.svgz~
+
+# Python and generated work
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+output/
+node_modules/
+
+.python-version
+.pyright/
+.cache/
+.mise/
+tmp/

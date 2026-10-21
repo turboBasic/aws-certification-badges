@@ -131,6 +131,33 @@ def test_font_sample_flattens_and_resizes(tmp_path: Path) -> None:
         font_sample(source, output, (2, 1, 12, 6), 3, "white")
 
 
+def test_font_sample_uses_exif_coordinates_and_allows_boxes_ending_at_image_edges(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "rotated.png"
+    image = Image.new("RGB", (3, 2), "black")
+    image.paste("red", (0, 0, 1, 1))
+    exif = Image.Exif()
+    exif[274] = 6
+    image.save(source, exif=exif)
+    output = tmp_path / "sample.png"
+
+    font_sample(source, output, (1, 0, 2, 3), 2, "white")
+
+    with Image.open(output) as sample:
+        assert sample.size == (2, 6)
+        assert sample.mode == "RGB"
+        assert sample.getpixel((0, 0)) == (255, 0, 0)
+
+
+def test_font_sample_rejects_boxes_beyond_oriented_image(tmp_path: Path) -> None:
+    source = tmp_path / "badge.png"
+    Image.new("RGB", (3, 2), "black").save(source)
+
+    with pytest.raises(ValueError, match="inside"):
+        font_sample(source, tmp_path / "sample.png", (0, 0, 4, 2), 1, "white")
+
+
 @pytest.mark.parametrize("box", ["1,2,3", "bad", "0,0,100,100", "5,0,1,2"])
 def test_font_sample_invalid_box(tmp_path: Path, box: str) -> None:
     source = tmp_path / "badge.png"

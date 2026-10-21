@@ -12,6 +12,35 @@ app = typer.Typer(no_args_is_help=True, help="Prepare badge rasters for manual v
 console = Console()
 
 
+def discover_sources(source: Path, output: Path) -> list[Path]:
+    if source.is_symlink():
+        raise ValueError(f"Input path must not be a symlink: {source}")
+    if not source.exists():
+        raise ValueError(f"Input path does not exist: {source}")
+
+    if source.is_dir():
+        resolved_source = source.resolve()
+        resolved_output = output.resolve()
+        if resolved_output == resolved_source or resolved_source in resolved_output.parents:
+            raise ValueError("Output directory must not be inside the batch input directory.")
+        candidates = sorted(source.iterdir())
+        symlinks = [
+            path for path in candidates if path.is_symlink() and path.suffix.lower() in EXTENSIONS
+        ]
+        if symlinks:
+            raise ValueError(f"Input path must not be a symlink: {symlinks[0]}")
+        sources = [
+            path for path in candidates if path.is_file() and path.suffix.lower() in EXTENSIONS
+        ]
+        if not sources:
+            raise ValueError(f"No supported raster images found in: {source}")
+        return sources
+
+    if not source.is_file() or source.suffix.lower() not in EXTENSIONS:
+        raise ValueError(f"Unsupported raster image: {source}")
+    return [source]
+
+
 @app.command("prepare")
 def prepare_command(
     source: Annotated[Path, typer.Argument(exists=True, readable=True)],
@@ -24,13 +53,7 @@ def prepare_command(
 ) -> None:
     """Crop alpha margins, normalize size, and export PNG + palette JSON."""
     try:
-        sources = (
-            sorted(p for p in source.iterdir() if p.is_file() and p.suffix.lower() in EXTENSIONS)
-            if source.is_dir()
-            else [source]
-        )
-        if not sources:
-            raise ValueError("No supported raster images found.")
+        sources = discover_sources(source, output)
         if padding * 2 >= size:
             raise ValueError("Padding must be less than half the canvas size.")
         targets = [

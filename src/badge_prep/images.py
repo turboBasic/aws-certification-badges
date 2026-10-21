@@ -1,6 +1,7 @@
 """Small image operations independent of the CLI."""
 
 import json
+import warnings
 from collections import Counter
 from pathlib import Path
 
@@ -10,8 +11,14 @@ EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff", ".bmp"}
 
 
 def load_rgba(path: Path) -> Image.Image:
-    with Image.open(path) as image:
-        return ImageOps.exif_transpose(image).convert("RGBA")
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(path) as image:
+                image.seek(0)
+                return ImageOps.exif_transpose(image).convert("RGBA")
+    except (Image.DecompressionBombError, Image.DecompressionBombWarning) as error:
+        raise ValueError(f"Image exceeds Pillow's safe pixel limit: {path}") from error
 
 
 def normalize(image: Image.Image, size: int, padding: int) -> Image.Image:

@@ -101,10 +101,12 @@ def test_batch_outputs_and_overwrite_protection(tmp_path: Path) -> None:
 
 
 def test_batch_collision_rejected_before_writing(tmp_path: Path) -> None:
-    Image.new("RGB", (10, 10)).save(tmp_path / "badge.png")
-    Image.new("RGB", (10, 10)).save(tmp_path / "badge.jpg")
+    source = tmp_path / "input"
+    source.mkdir()
+    Image.new("RGB", (10, 10)).save(source / "badge.png")
+    Image.new("RGB", (10, 10)).save(source / "badge.jpg")
     output = tmp_path / "output"
-    result = runner.invoke(app, ["prepare", str(tmp_path), "--output", str(output)])
+    result = runner.invoke(app, ["prepare", str(source), "--output", str(output)])
     assert result.exit_code == 1
     assert "duplicate" in result.output
     assert not output.exists()
@@ -166,3 +168,102 @@ def test_font_sample_invalid_box(tmp_path: Path, box: str) -> None:
     result = runner.invoke(app, ["font-sample", str(source), "--box", box, "--output", str(output)])
     assert result.exit_code == 1
     assert not output.exists()
+
+
+def test_prepare_rejects_unsupported_and_empty_inputs(tmp_path: Path) -> None:
+    unsupported = tmp_path / "notes.txt"
+    unsupported.write_text("not an image")
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    output = tmp_path / "output"
+
+    unsupported_result = runner.invoke(app, ["prepare", str(unsupported), "--output", str(output)])
+    empty_result = runner.invoke(app, ["prepare", str(empty), "--output", str(output)])
+
+    assert unsupported_result.exit_code == 1
+    assert "Unsupported raster image" in unsupported_result.output
+    assert empty_result.exit_code == 1
+    assert "No supported raster images" in empty_result.output
+    assert not output.exists()
+
+
+def test_prepare_rejects_symlink_input(tmp_path: Path) -> None:
+    source = tmp_path / "source.png"
+    Image.new("RGB", (2, 2), "red").save(source)
+    link = tmp_path / "linked.png"
+    link.symlink_to(source)
+
+    result = runner.invoke(app, ["prepare", str(link), "--output", str(tmp_path / "output")])
+
+    assert result.exit_code == 1
+    assert "must not be a symlink" in result.output
+
+
+def test_prepare_rejects_symlink_member_in_batch(tmp_path: Path) -> None:
+    source = tmp_path / "source.png"
+    Image.new("RGB", (2, 2), "red").save(source)
+    batch = tmp_path / "batch"
+    batch.mkdir()
+    (batch / "linked.png").symlink_to(source)
+
+    result = runner.invoke(app, ["prepare", str(batch), "--output", str(tmp_path / "output")])
+
+    assert result.exit_code == 1
+    assert "must not be a symlink" in result.output
+
+
+def test_prepare_uses_first_frame_of_multi_frame_image(tmp_path: Path) -> None:
+    source = tmp_path / "pages.tiff"
+    Image.new("RGB", (4, 3), "red").save(
+        source,
+        save_all=True,
+        append_images=[Image.new("RGB", (4, 3), "blue")],
+    )
+    output = tmp_path / "output"
+
+    result = runner.invoke(
+        app,
+        [
+            "prepare",
+            str(source),
+            "--output",
+            str(output),
+            "--size",
+            "4",
+            "--padding",
+            "0",
+            "--colors",
+            "1",
+        ],
+    )
+
+    assert result.exit_code == 0
+    with Image.open(output / "pages.png") as prepared:
+        assert prepared.getpixel((1, 1)) == (255, 0, 0, 255)
+
+
+def test_prepare_rejects_output_nested_in_input_directory(tmp_path: Path) -> None:
+    batch = tmp_path / "batch"
+    batch.mkdir()
+    Image.new("RGB", (2, 2), "red").save(batch / "badge.png")
+    output = batch / "generated"
+
+    result = runner.invoke(app, ["prepare", str(batch), "--output", str(output)])
+
+    assert result.exit_code == 1
+    assert "must not be inside" in result.output
+    assert not output.exists()
+
+
+def test_prepare_reports_decompression_bomb_without_traceback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "large.png"
+    Image.new("RGB", (20, 20), "red").save(source)
+    monkeypatch.setattr(Image, "MAX_IMAGE_PIXELS", 100)
+
+    result = runner.invoke(app, ["prepare", str(source), "--output", str(tmp_path / "output")])
+
+    assert result.exit_code == 1
+    assert "safe pixel limit" in result.output
+    assert "Traceback" not in result.output

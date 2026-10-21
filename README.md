@@ -82,12 +82,15 @@ and licensing remain manual. The CLI makes no network calls or automatic uploads
 ## Development
 
 ```console
+just ci
 just fmt
 just lint
 just typecheck
 just test
 just build
 ```
+
+`just ci` runs the same lint, build, type-check, and test stages as GitHub Actions.
 
 Python 3.14 runs the CLI and tests. `just setup` installs the pinned tools, syncs
 locked dependencies, and installs pre-commit and commit-message hooks.
@@ -103,7 +106,7 @@ All linters and formatters run through prek. Hooks cover Python linting and
 formatting, strict types, Markdown, TOML, YAML, spelling, file integrity, and
 Conventional Commit messages. `just lint` skips Pyright because `just typecheck`
 owns that check; commits still run its hook. `just fmt` formats Python and TOML.
-GitHub workflow validation is outside these local checks. Source assets remain
+`just lint` also runs actionlint on GitHub workflows. Source assets remain
 untouched; the large-file guard allows files up to 5 MiB.
 
 The supplied Anthropic raster acceptance results, source hashes, and manual inspection notes are

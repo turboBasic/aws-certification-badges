@@ -4,24 +4,26 @@ default:
 # Bootstrap mise first; this also refreshes tools on later setup runs.
 setup:
     mise install
-    just deps
+    mise run deps
     prek install
 
 deps:
-    uv sync --locked
+    mise run deps
 
-# The separate typecheck command owns the full-tree check during validation.
-lint: deps
-    prek run --all-files --show-diff-on-failure --skip pyright
+lint:
+    mise run lint
 
-fmt: deps
-    prek run ruff-format taplo-fmt --all-files --show-diff-on-failure
+fmt:
+    mise run fmt
 
-typecheck: deps
-    uv run --locked pyright
+typecheck:
+    mise run typecheck
 
-test *args: deps
-    uv run --locked pytest {{args}}
+test *args:
+    mise run test -- {{args}}
 
-build: deps
-    uv build
+build:
+    mise run build
+
+ci:
+    mise run ci

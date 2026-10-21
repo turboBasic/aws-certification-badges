@@ -1,15 +1,19 @@
 name: CI
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
-      - run: just setup
-      - run: just lint
-      - run: just typecheck
-      - run: just test
-      - run: just build
+  badge-prep:
+    uses: turboBasic/github-actions/.github/workflows/project-ci.yml@v0.4
+    permissions:
+      contents: read

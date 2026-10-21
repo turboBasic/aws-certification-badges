@@ -28,7 +28,7 @@ output/                  Ignored generated results
 ## Working rules
 
 Follow .editorconfig. Keep the src layout and current Python typing syntax.
-Use just lint, just fmt, just typecheck, just test, and just build.
+Use just ci, just lint, just fmt, just typecheck, just test, and just build.
 Linters and formatters run through prek. Human-facing tasks belong in justfile;
 mise owns tool pins and the environment. Python tools are dev dependencies in
 pyproject.toml, resolved in uv.lock. Run uv lock after dependency edits and include
@@ -37,7 +37,9 @@ Use just setup to install tools, locked dependencies, and both git hook types.
 Keep Pyright strict and test signatures typed. Conventional Commits are enforced
 by the commit-msg hook. Spelling rules own exclusions in .cspell.config.yaml;
 project words belong in .cspell/project.txt. Never add machine-specific dictionary
-imports. GitHub CI remains outside the local tooling alignment.
+imports. GitHub CI calls the shared `project-ci` workflow, which runs the hidden
+mise task API for lint, build, type-check, and tests; `just ci` runs the same
+gates locally.
 Never overwrite existing outputs or modify source assets. Preflight batch name
 collisions before writing. Preserve aspect ratio and transparency; ignore fully
 transparent pixels when extracting colors. Test image behavior and CLI failures.

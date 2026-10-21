@@ -3,6 +3,7 @@ python = "3.14"
 uv = "0.13.3"
 just = "1.59.0"
 prek = "0.5.6"
+actionlint = "1.7.12"
 node = "26.12.0"
 "npm:cspell" = "10.2.2"
 "npm:markdownlint-cli2" = "0.23.2"
@@ -10,3 +11,50 @@ taplo = "0.10.0"
 
 [env]
 _.python.venv = { path = ".venv", create = true }
+
+# Hidden task API consumed by the shared project-ci workflow; justfile keeps the human-facing names.
+[tasks.deps]
+hide = true
+run = "uv sync --locked"
+
+[tasks."lint:python"]
+hide = true
+depends = ["deps"]
+run = "prek run --all-files --show-diff-on-failure --skip pyright"
+
+[tasks."lint:workflows"]
+hide = true
+run = "actionlint"
+
+[tasks.lint]
+hide = true
+depends = ["lint:python", "lint:workflows"]
+
+[tasks.fmt]
+hide = true
+depends = ["deps"]
+run = "prek run ruff-format taplo-fmt --all-files --show-diff-on-failure"
+
+[tasks.typecheck]
+hide = true
+depends = ["deps"]
+run = "uv run --locked pyright"
+
+[tasks.test]
+hide = true
+depends = ["deps"]
+run = "uv run --locked pytest"
+
+[tasks.build]
+hide = true
+depends = ["deps"]
+run = "uv build"
+
+[tasks.ci]
+hide = true
+run = [
+  "mise run lint",
+  "mise run build",
+  "mise run typecheck",
+  "mise run test",
+]

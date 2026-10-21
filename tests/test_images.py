@@ -267,3 +267,38 @@ def test_prepare_reports_decompression_bomb_without_traceback(
     assert result.exit_code == 1
     assert "safe pixel limit" in result.output
     assert "Traceback" not in result.output
+
+
+def test_batch_collision_checks_every_target_before_writing(tmp_path: Path) -> None:
+    source = tmp_path / "input"
+    source.mkdir()
+    Image.new("RGB", (10, 10), "red").save(source / "first.png")
+    Image.new("RGB", (10, 10), "blue").save(source / "second.png")
+    output = tmp_path / "output"
+    output.mkdir()
+    occupied = output / "second.palette.json"
+    occupied.write_text("keep this file")
+
+    result = runner.invoke(app, ["prepare", str(source), "--output", str(output)])
+
+    assert result.exit_code == 1
+    assert occupied.read_text() == "keep this file"
+    assert not (output / "first.png").exists()
+    assert not (output / "first.palette.json").exists()
+    assert not (output / "second.png").exists()
+
+
+def test_single_file_preflight_rejects_output_symlink_to_source(tmp_path: Path) -> None:
+    source = tmp_path / "badge.png"
+    Image.new("RGB", (10, 10), "red").save(source)
+    original = source.read_bytes()
+    output = tmp_path / "output"
+    output.mkdir()
+    (output / "badge.png").symlink_to(source)
+
+    result = runner.invoke(app, ["prepare", str(source), "--output", str(output)])
+
+    assert result.exit_code == 1
+    assert source.read_bytes() == original
+    assert (output / "badge.png").is_symlink()
+    assert not (output / "badge.palette.json").exists()

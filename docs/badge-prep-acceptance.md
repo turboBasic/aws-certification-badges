@@ -32,24 +32,3 @@ A font sample was exported from the Architect - Foundations source at
 `left,top,right,bottom = 55,325,550,450`, scale 2, with `#d97757` behind transparent pixels. The
 result was an RGB PNG of 990 × 250; visual comparison with the source confirms it contains the two
 lines “Claude Certified / Architect” without clipping or including neighboring text.
-
-## AWS raster comparison
-
-As a follow-up acceptance pass, the four existing AWS raster examples were prepared with the same
-size, padding, and palette options. Each source is a 520 × 600 RGBA PNG; each prepared output is
-1024 × 1024 RGBA with alpha bounds `(96, 32, 928, 992)`. Side-by-side inspection found the artwork
-centered and proportional, with the 32-pixel outer padding visible in the checkerboard comparison.
-
-![The four AWS source raster badges beside their normalized outputs](aws-raster-comparison.png)
-
-Source hashes identify the precise assets inspected:
-
-| Source raster | SHA-256 |
-| --- | --- |
-| `aws-certified-ai-practitioner-logo-600px.png` | `f014e60f2ed9ba9da4a0f66a44de7fd01bd2f935cf5f7a4a5e47f70d73afb127` |
-| `aws-certified-cloud-practitioner-logo-600px.png` | `e6ad20af97181418a198731707d16b6d29642e7bf72bb0a32d3c610467b6b53f` |
-| `aws-certified-solutions-architect-associate-logo-600px.png` | `38f8561aa0a7f8bc22ece19386c9a15eb595095d29a28bbc1a6ba23919b2a0a5` |
-| `aws-certified-solutions-architect-professional-logo-600px.png` | `bd963c6acbb884e774a09365636791e40a4a83087caa3f094fdc1b576fea0b98` |
-
-The output directory contained four PNGs and four palette JSON files. An occupied-directory rerun
-exited 1 and left all source and output hashes unchanged.

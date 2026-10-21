@@ -64,12 +64,24 @@ def prepare_command(
         if {p.resolve() for p in sources}.intersection(p.resolve() for p in targets):
             raise ValueError("Output would replace a source image; choose a separate directory.")
         ensure_available(targets)
-        for path in sources:
-            prepare(path, output, size, padding, colors)
-            console.print(f"Prepared {path.name}", markup=False)
     except (OSError, ValueError) as error:
         console.print(f"Error: {error}", style="red", markup=False)
         raise typer.Exit(1) from error
+
+    succeeded = 0
+    failed = 0
+    for path in sources:
+        try:
+            prepare(path, output, size, padding, colors)
+        except (OSError, ValueError) as error:
+            failed += 1
+            console.print(f"Error preparing {path}: {error}", style="red", markup=False)
+        else:
+            succeeded += 1
+            console.print(f"Prepared {path.name}", markup=False)
+    console.print(f"Batch complete: {succeeded} succeeded, {failed} failed.", markup=False)
+    if failed:
+        raise typer.Exit(1)
 
 
 @app.command("font-sample")

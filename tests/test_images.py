@@ -265,7 +265,7 @@ def test_prepare_reports_decompression_bomb_without_traceback(
     result = runner.invoke(app, ["prepare", str(source), "--output", str(tmp_path / "output")])
 
     assert result.exit_code == 1
-    assert "safe pixel limit" in result.output
+    assert "safe pixel limit" in " ".join(result.output.split())
     assert "Traceback" not in result.output
 
 
@@ -358,3 +358,22 @@ def test_prepare_rolls_back_published_png_after_palette_publish_failure(
     assert source.read_bytes() == original
     assert list(output.iterdir()) == [sentinel]
     assert sentinel.read_text() == "preserve this file"
+
+
+def test_batch_reports_corrupt_member_and_keeps_valid_pair(tmp_path: Path) -> None:
+    source = tmp_path / "input"
+    source.mkdir()
+    (source / "a-corrupt.png").write_bytes(b"not a png")
+    Image.new("RGB", (10, 10), "blue").save(source / "b-valid.png")
+    output = tmp_path / "output"
+
+    result = runner.invoke(app, ["prepare", str(source), "--output", str(output)])
+
+    assert result.exit_code == 1
+    assert "a-corrupt.png" in result.output
+    assert "Batch complete: 1 succeeded, 1 failed." in result.output
+    assert (output / "b-valid.png").is_file()
+    assert (output / "b-valid.palette.json").is_file()
+    assert not (output / "a-corrupt.png").exists()
+    assert not (output / "a-corrupt.palette.json").exists()
+    assert "Traceback" not in result.output

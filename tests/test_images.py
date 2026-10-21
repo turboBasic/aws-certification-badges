@@ -6,7 +6,7 @@ from PIL import Image
 from typer.testing import CliRunner
 
 from badge_prep.cli import app
-from badge_prep.images import font_sample, normalize, palette
+from badge_prep.images import font_sample, load_rgba, normalize, palette
 
 runner = CliRunner()
 
@@ -17,6 +17,44 @@ def test_normalize_crops_alpha_and_preserves_proportions() -> None:
     result = normalize(image, 80, 10)
     assert result.size == (80, 80)
     assert result.getchannel("A").getbbox() == (10, 25, 70, 55)
+
+
+def test_normalize_keeps_partially_transparent_edge_pixels() -> None:
+    image = Image.new("RGBA", (9, 7))
+    image.paste((255, 0, 0, 1), (3, 2, 4, 3))
+    image.paste((0, 0, 255, 255), (5, 4, 6, 5))
+
+    result = normalize(image, 9, 0)
+
+    assert result.getchannel("A").getbbox() == (0, 0, 9, 9)
+    pixel = result.getpixel((0, 0))
+    assert isinstance(pixel, tuple)
+    assert pixel[3] > 0
+
+
+def test_normalize_centers_odd_sized_result_and_preserves_ratio() -> None:
+    image = Image.new("RGBA", (5, 3), "red")
+
+    result = normalize(image, 9, 1)
+
+    assert result.getchannel("A").getbbox() == (1, 2, 8, 6)
+    assert result.getpixel((4, 4)) == (255, 0, 0, 255)
+
+
+def test_load_rgba_applies_exif_orientation(tmp_path: Path) -> None:
+    source = tmp_path / "rotated.png"
+    image = Image.new("RGB", (3, 2))
+    image.paste((255, 0, 0), (0, 0, 1, 1))
+    exif = Image.Exif()
+    exif[274] = 6
+    image.save(source, exif=exif)
+
+    result = load_rgba(source)
+
+    assert result.size == (2, 3)
+    pixel = result.getpixel((1, 0))
+    assert isinstance(pixel, tuple)
+    assert pixel[:3] == (255, 0, 0)
 
 
 def test_palette_excludes_hidden_colors_and_orders_by_frequency() -> None:

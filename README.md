@@ -1,8 +1,8 @@
-# AWS Certification Badges
+# Certification Badges
 
 <!-- markdownlint-disable MD033 MD005 -->
 
-A collection of badge assets for AWS certifications — vector templates for editing and raster examples for reference.
+A collection of badge assets for AWS and Anthropic certifications — vector templates for editing and raster examples for reference.
 
 ## Raster preparation CLI
 
@@ -121,22 +121,32 @@ pytest, Ruff, and that dictionary; extension recommendations are included.
 | Preview | Certification | Format | File |
 | :---: | :--- | :---: | :--- |
 | <a href="assets/vector%20templates/aws-certified-template.svg"><img src="assets/vector%20templates/aws-certified-template.svg" style="max-height: 100px; height: auto; width: auto;" alt="AWS Certified Template"/></a> | AWS Certified (Generic Template) | SVG | [aws-certified-template.svg](assets/vector%20templates/aws-certified-template.svg) |
+| <a href="assets/vector%20templates/anthropic-certified-template.svg"><img src="assets/vector%20templates/anthropic-certified-template.svg" style="max-height: 100px; height: auto; width: auto;" alt="Anthropic Certified Template"/></a> | Anthropic Certified (Generic Template) | SVG | [anthropic-certified-template.svg](assets/vector%20templates/anthropic-certified-template.svg) |
 | <a href="assets/vector%20rendered/aws-certified-ai-practitioner.svg"><img src="assets/vector%20rendered/aws-certified-ai-practitioner.svg" style="max-height: 100px; height: auto; width: auto;" alt="AWS Certified AI Practitioner"/></a> | AWS Certified AI Practitioner | SVG | [aws-certified-ai-practitioner.svg](assets/vector%20rendered/aws-certified-ai-practitioner.svg) |
 | <a href="assets/vector%20rendered/aws-certified-cloud-practitioner.svg"><img src="assets/vector%20rendered/aws-certified-cloud-practitioner.svg" style="max-height: 100px; height: auto; width: auto;" alt="AWS Certified Cloud Practitioner"/></a> | AWS Certified Cloud Practitioner | SVG | [aws-certified-cloud-practitioner.svg](assets/vector%20rendered/aws-certified-cloud-practitioner.svg) |
 | <a href="assets/vector%20rendered/aws-certified-solutions-architect-associate.svg"><img src="assets/vector%20rendered/aws-certified-solutions-architect-associate.svg" style="max-height: 100px; height: auto; width: auto;" alt="AWS Certified Solutions Architect Associate"/></a> | AWS Certified Solutions Architect Associate | SVG | [aws-certified-solutions-architect-associate.svg](assets/vector%20rendered/aws-certified-solutions-architect-associate.svg) |
 | <a href="assets/vector%20rendered/aws-certified-solutions-architect-professional.svg"><img src="assets/vector%20rendered/aws-certified-solutions-architect-professional.svg" style="max-height: 100px; height: auto; width: auto;" alt="AWS Certified Solutions Architect Professional"/></a> | AWS Certified Solutions Architect Professional | SVG | [aws-certified-solutions-architect-professional.svg](assets/vector%20rendered/aws-certified-solutions-architect-professional.svg) |
+| <a href="assets/vector%20rendered/claude-certified-architect-professional.svg"><img src="assets/vector%20rendered/claude-certified-architect-professional.svg" style="max-height: 100px; height: auto; width: auto;" alt="Claude Certified Architect Professional"/></a> | Claude Certified Architect Professional | SVG | [claude-certified-architect-professional.svg](assets/vector%20rendered/claude-certified-architect-professional.svg) |
+| <a href="assets/vector%20rendered/claude-certified-architect-foundations.svg"><img src="assets/vector%20rendered/claude-certified-architect-foundations.svg" style="max-height: 100px; height: auto; width: auto;" alt="Claude Certified Architect Foundations"/></a> | Claude Certified Architect Foundations | SVG | [claude-certified-architect-foundations.svg](assets/vector%20rendered/claude-certified-architect-foundations.svg) |
+| <a href="assets/vector%20rendered/claude-certified-associate-foundations.svg"><img src="assets/vector%20rendered/claude-certified-associate-foundations.svg" style="max-height: 100px; height: auto; width: auto;" alt="Claude Certified Associate Foundations"/></a> | Claude Certified Associate Foundations | SVG | [claude-certified-associate-foundations.svg](assets/vector%20rendered/claude-certified-associate-foundations.svg) |
+| <a href="assets/vector%20rendered/claude-certified-developer-foundations.svg"><img src="assets/vector%20rendered/claude-certified-developer-foundations.svg" style="max-height: 100px; height: auto; width: auto;" alt="Claude Certified Developer Foundations"/></a> | Claude Certified Developer Foundations | SVG | [claude-certified-developer-foundations.svg](assets/vector%20rendered/claude-certified-developer-foundations.svg) |
 
 ## Structure
 
 ```plaintext
 assets/
 ├── vector templates/
-│   └── aws-certified-template.svg                          # Editable SVG base template
+│   ├── anthropic-certified-template.svg                    # Editable SVG base template
+│   └── aws-certified-template.svg                           # Editable SVG base template
 ├── vector rendered/
 │   ├── aws-certified-ai-practitioner.svg
 │   ├── aws-certified-cloud-practitioner.svg
 │   ├── aws-certified-solutions-architect-associate.svg
-│   └── aws-certified-solutions-architect-professional.svg
+│   ├── aws-certified-solutions-architect-professional.svg
+│   ├── claude-certified-architect-professional.svg
+│   ├── claude-certified-architect-foundations.svg
+│   ├── claude-certified-associate-foundations.svg
+│   └── claude-certified-developer-foundations.svg
 └── raster examples/
     ├── aws-certified-ai-practitioner-logo-600px.png
     ├── aws-certified-cloud-practitioner-logo-600px.png

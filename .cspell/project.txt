@@ -36,6 +36,7 @@ RGBA
 rglob
 rsvg
 ruff
+Sodipodi
 svgz
 swatches
 tamasfe

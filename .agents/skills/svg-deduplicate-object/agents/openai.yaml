@@ -1,0 +1,3 @@
+interface:
+  display_name: "SVG Object Deduplication"
+  short_description: "Deduplicate labeled SVG objects"
